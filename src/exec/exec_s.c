@@ -6,7 +6,7 @@
 /*   By: shurtado <shurtado@student.42barcelona.fr> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/07 19:40:42 by shurtado          #+#    #+#             */
-/*   Updated: 2024/10/08 17:20:13 by shurtado         ###   ########.fr       */
+/*   Updated: 2024/10/11 15:59:30 by shurtado         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,14 @@ static void	handle_parent_process(t_ms *ms, char *path, pid_t pid)
 	ms->last_pid = pid;
 }
 
+static void	restore_fd_redir(int (*save)[])
+{
+	dup2((*save)[0], STDOUT_FILENO);
+	dup2((*save)[1], STDIN_FILENO);
+	close((*save)[0]);
+	close((*save)[1]);
+}
+
 void	execute_simple_comand(t_ms *ms)
 {
 	pid_t	pid;
@@ -57,14 +65,14 @@ void	execute_simple_comand(t_ms *ms)
 		setup_redirections(ms->av);
 		remove_redirections(ms->av);
 		ms->status = exec_builtin(ms->av, ms->env, &ms->crude_env);
-		dup2(save[0], STDOUT_FILENO);
-		dup2(save[1], STDIN_FILENO);
-		close(save[0]);
-		close(save[1]);
+		restore_fd_redir(&save);
 		return ;
 	}
 	init_signals(CHILD);
-	path = getpath(ms->env, ms->av[0]);
+	if (!strcmp(ms->av[0], DOUBLE_LESS))
+		path = getpath(ms->env, ms->av[2]);
+	else
+		path = getpath(ms->env, ms->av[0]);
 	pid = fork();
 	if (pid == 0)
 		handle_child_process(ms, path);
