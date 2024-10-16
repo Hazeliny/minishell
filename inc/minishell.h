@@ -6,7 +6,7 @@
 /*   By: shurtado <shurtado@student.42barcelona.fr> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 12:14:45 by linyao            #+#    #+#             */
-/*   Updated: 2024/10/08 16:48:45 by shurtado         ###   ########.fr       */
+/*   Updated: 2024/10/16 04:36:13 by shurtado         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@
 
 # define EXITERR "minishell: exit: %s: numeric argument required\n"
 # define PROMPT "\x1b[1;32mminishell\x1b[0m\x1b[1;36m > \x1b[0m"
+# define SINTAXERROR "minishell: syntax error near unexpected token %s\n"
 # define SINGLE_QUOTE 1
 # define DOUBLE_QUOTE 2
 # define MORE '>'
@@ -45,6 +46,9 @@
 
 # define NORMAL 0
 # define CHILD 1
+
+# define TRUNCATE 0
+# define APPEND 1
 
 # ifndef PATH_MAX
 #  define PATH_MAX 4096
@@ -74,7 +78,7 @@ bool	free_node(t_node **n, t_node *cur);
 bool	handle_single(bool *s_close, bool *d_close, int *flag);
 bool	handle_double(bool *s_close, bool *d_close, int *flag);
 bool	check_quote(char *s);
-void	split_into_arrays(t_hash *env, char ***new, char *input);
+void	split_into_arrays(t_hash *env, char ***new, char *input, int i);
 char	**split_av(t_hash *env, char *input);
 void	store_to_array(char ***array, char **arr);
 bool	add_array(char ***array, char *s);
@@ -93,6 +97,7 @@ void	check_handle_dollar(t_hash *env, char **arr, char **c, char ch);
 char	**get_infile_path(char ***av);
 void	renovar_array(char ***new_array, char **new_arr, char **str);
 void	initarrays(char **new_arr, char ***new_array);
+void	handle_quote_first(t_hash *env, char ***array, char **arr, char **c);
 
 //Utils
 bool	is_special(const char *s);
@@ -123,6 +128,10 @@ char	*get_filename(char **av, char *redir);
 void	execute_simple_comand(t_ms *ms);
 int		find_pipe_position(char **av);
 char	**allocate_command_array(int size);
+int		find_pipe_position(char **av);
+void	exit_error_redir(char **filename);
+void	move_std(int **fd);
+void	err_child(char **cmd);
 
 //Signals
 void	init_signals(int mode);
@@ -135,13 +144,25 @@ void	clean_pipes(int **fd_pipe);
 bool	has_redirection(char **av, char *redir);
 void	process_pipe(int fd_pipe[2], int is_last, int fd_local[2]);
 void	exe_cmd(t_ms *ms, int fd_in, int fd_out, char **cmd);
-char	**get_cmd(t_ms *ms);
+char	**get_cmd(char **av);
 bool	setup_redirections(char **cmd);
 int		wait_for_last_process(t_ms *ms);
 bool	handle_input_redirection(char **av);
-bool	handle_output_trunc_redirection(char **av);
-bool	handle_output_append_redirection(char **av);
+bool	handle_output_redirection(char **av);
 bool	handle_heredoc_redirection(char **av);
 int		handle_heredoc(char *delimiter);
+
+///parse2
+bool	check_p2quotes(char *s);
+char	**process(char **av, t_hash *env);
+void	swap_word(char *word, char **s, char *init, int i);
+char	*get_word(char *sinit, t_hash *env);
+void	manage_dolar(char **s, t_hash *env);
+void	expand_dolar(char **av, t_hash *env);
+bool	all_quote_ok(char **av);
+char	**create_new_av(char **av, int i, int j, int new_size);
+char	**split_input(char *input, int i, int j);
+bool	is_separator(char c);
+char	**free_newav(char **array, int size);
 
 #endif

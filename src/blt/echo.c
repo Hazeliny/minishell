@@ -6,7 +6,7 @@
 /*   By: shurtado <shurtado@student.42barcelona.fr> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/21 13:04:27 by shurtado          #+#    #+#             */
-/*   Updated: 2024/10/08 16:28:48 by shurtado         ###   ########.fr       */
+/*   Updated: 2024/10/15 19:53:45 by shurtado         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,26 +27,55 @@ bool	is_special(const char *s)
 
 // You should receive **av moving its pointer to echo
 //in case you have redirects or pipes
+static bool	all_is_n(const char *s)
+{
+	int	i;
 
-int	blt_echo(char **av)
+	i = 1;
+	while (s[i] == 'n')
+		i++;
+	if (s[i] == '\0')
+		return (true);
+	else
+		return (false);
+}
+
+static bool	check_n(char **av, int *j)
 {
 	bool	n;
 
 	n = false;
+	while (av[*j] && !strncmp(av[*j], "-n", 2))
+	{
+		if (*j == 0 && all_is_n(av[*j]))
+		{
+			n = true;
+			(*j)++;
+		}
+		else if (all_is_n(av[*j]))
+			(*j)++;
+		else
+			break ;
+	}
+	return (n);
+}
+
+int	blt_echo(char **av)
+{
+	bool	n;
+	int		j;
+
+	j = 0;
 	if (!av || !av[0])
 		return (0);
 	av++;
-	if (av[0] && !strncmp(av[0], "-n", 2))
+	n = check_n(av, &j);
+	while (av[j])
 	{
-		n = true;
-		av++;
-	}
-	while (av[0] && !is_special(av[0]))
-	{
-		ft_printf("%s", *av);
-		if (*(av + 1) && !is_special(*(av + 1)))
+		ft_printf("%s", av[j]);
+		if (av[j + 1])
 			ft_printf(" ");
-		av++;
+		j++;
 	}
 	if (!n)
 		ft_printf("\n");
