@@ -6,17 +6,26 @@
 /*   By: shurtado <shurtado@student.42barcelona.fr> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 23:58:47 by shurtado          #+#    #+#             */
-/*   Updated: 2024/10/16 04:42:20 by shurtado         ###   ########.fr       */
+/*   Updated: 2024/10/21 20:20:24 by shurtado         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+//caracteres antes de dejar de procesar la palabra del dolar, ejemplo: $hola/tmp
+//solo $hola se debe procesar
+int	is_valid_char(char c)
+{
+	return (ft_isalnum(c) || c == '_' || c == '?');
+}
 
 void	swap_word(char *word, char **s, char *init, int i)
 {
 	int		k;
 	char	tmp[900];
 
+	if (!strcmp("$", word) && init[1])
+		word++;
 	while ((*s)[++i] != *init)
 		tmp[i] = (*s)[i];
 	k = -1;
@@ -27,16 +36,14 @@ void	swap_word(char *word, char **s, char *init, int i)
 		else
 			tmp[i++] = word[k];
 	}
-	while (*init && *init != ' ')
+	init++;
+	while (*init && is_valid_char(*init))
 		init++;
 	while (*init)
 		tmp[i++] = *init++;
 	tmp[i] = '\0';
 	free(*s);
-	if (tmp[0])
-		*s = ft_strdup(tmp);
-	else
-		*s = ft_strdup("");
+	*s = ft_strdup(tmp);
 }
 
 char	*get_word(char *sinit, t_hash *env)
@@ -47,12 +54,12 @@ char	*get_word(char *sinit, t_hash *env)
 	char	*word;
 
 	i = 1;
-	while (sinit[i] != '\0' && sinit[i] != ' ')
+	while (sinit[i] != '\0' && is_valid_char(sinit[i]))
 	{
 		tmp[i - 1] = sinit[i];
 		i++;
 	}
-	if (i == 1)
+	if (i == 1 || !strcmp(sinit, "$\""))
 		return (ft_strdup("$"));
 	tmp[i - 1] = '\0';
 	key = extract_key(tmp);

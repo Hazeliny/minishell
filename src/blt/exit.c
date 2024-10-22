@@ -5,32 +5,34 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: shurtado <shurtado@student.42barcelona.fr> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/21 13:09:50 by shurtado          #+#    #+#             */
-/*   Updated: 2024/10/07 17:29:59 by shurtado         ###   ########.fr       */
+/*   Created: 2024/10/20 16:40:56 by shurtado          #+#    #+#             */
+/*   Updated: 2024/10/20 17:07:58 by shurtado         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-//temporal (void)exit_code becouse !Werror flag
-int	blt_exit(t_ms *ms)
+int	blt_exit(char **cmd)
 {
-	char	**av;
-	int		exit_code;
+	int	result;
 
-	av = ms->av;
-	(void)exit_code;
-	exit_code = 0;
-	if (av[1])
+	if (cmd[1])
 	{
-		exit_code = ft_atoi(av[1]);
-		if (av[2])
+		if (cmd[2])
 		{
-			ft_printf("exit: too many arguments\n");
+			ft_putstr_fd("exit: too many arguments\n", 2);
 			return (1);
 		}
+		if (!all_digits(cmd[1]))
+		{
+			ft_putstr_fd("minishell: exit: ", 2);
+			ft_putstr_fd(cmd[1], 2);
+			ft_putstr_fd(": numeric argument required\n", 2);
+			return (2);
+		}
+		result = ft_atoi(cmd[1]);
 	}
-	free_resources(ms);
-	ft_printf("exit\n");
-	exit(exit_code);
+	else
+		return (0);
+	return (result);
 }

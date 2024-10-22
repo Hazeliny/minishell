@@ -6,7 +6,7 @@
 /*   By: shurtado <shurtado@student.42barcelona.fr> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 12:14:45 by linyao            #+#    #+#             */
-/*   Updated: 2024/10/16 04:36:13 by shurtado         ###   ########.fr       */
+/*   Updated: 2024/10/21 21:10:46 by shurtado         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@
 # include <fcntl.h>
 # include <signal.h>
 # include <termios.h>
+# include <stdint.h>
 
 # define EXITERR "minishell: exit: %s: numeric argument required\n"
 # define PROMPT "\x1b[1;32mminishell\x1b[0m\x1b[1;36m > \x1b[0m"
@@ -50,6 +51,9 @@
 # define TRUNCATE 0
 # define APPEND 1
 
+# define IN 0
+# define OUT 1
+
 # ifndef PATH_MAX
 #  define PATH_MAX 4096
 # endif
@@ -64,6 +68,9 @@ typedef struct s_ms
 	int				last_pid;
 	int				status;
 	int				**fd_pipe;
+	t_list			*pidlst;
+	int				atty_in;
+	int				atty_out;
 }	t_ms;
 
 void	init_ms(t_ms *ms, char **env);
@@ -107,11 +114,12 @@ void	delete_env(t_hash *env);
 void	free_resources(t_ms *ms);
 void	process_cmds(t_ms *ms);
 void	remove_redirections(char **av);
-void	check_exit_args(t_ms *ms);
+int		check_exit_args(t_ms *ms);
+int		all_digits(const char *str);
 
 //Built-ins
 int		blt_echo(char **av);
-int		blt_exit(t_ms *ms);
+int		blt_exit(char **cmd);
 int		blt_cd(char **av, t_hash *env);
 int		blt_pwd(void);
 int		blt_export(char **av, t_hash *env, char ***crude);
@@ -124,33 +132,37 @@ bool	is_builtin(char *cmd);
 int		process_line(t_ms *ms);
 int		exec_builtin(char **cmd, t_hash *env, char ***crude);
 char	*getpath(t_hash *env, char *file);
-char	*get_filename(char **av, char *redir);
-void	execute_simple_comand(t_ms *ms);
+char	*get_filename_ordeli(char **av, char *redir);
 int		find_pipe_position(char **av);
 char	**allocate_command_array(int size);
 int		find_pipe_position(char **av);
 void	exit_error_redir(char **filename);
-void	move_std(int **fd);
 void	err_child(char **cmd);
+char	*find_executable_path(char **paths, char *file);
 
 //Signals
 void	init_signals(int mode);
 void	set_child_signals(void);
 void	handle_signal(int sig);
+void	wait_for_processes(t_list *pidlst, int *status);
 
 //PIPE
 void	init_pipes(t_ms *ms);
 void	clean_pipes(int **fd_pipe);
 bool	has_redirection(char **av, char *redir);
 void	process_pipe(int fd_pipe[2], int is_last, int fd_local[2]);
-void	exe_cmd(t_ms *ms, int fd_in, int fd_out, char **cmd);
+void	exe_cmd(t_ms *ms, int *fd_in, int *fd_out, char **cmd);
 char	**get_cmd(char **av);
-bool	setup_redirections(char **cmd);
+bool	setup_redirections(char **cmd, int fd_in, int fd_out);
 int		wait_for_last_process(t_ms *ms);
-bool	handle_input_redirection(char **av);
-bool	handle_output_redirection(char **av);
-bool	handle_heredoc_redirection(char **av);
-int		handle_heredoc(char *delimiter);
+bool	handle_input_redirection(char **av, int fd_in);
+bool	handle_output_redirection(char **av, int fd_out);
+bool	make_hdoc_files(char **av);
+bool	handle_heredoc(char *delimiter);
+bool	is_ptyin_interactive(char *cmd);
+bool	catch_heredocs(char **av, int fd_in);
+void	restore_std_fds(t_ms *ms);
+void	handle_builtin(t_ms *ms, char **cmd);
 
 ///parse2
 bool	check_p2quotes(char *s);
@@ -164,5 +176,8 @@ char	**create_new_av(char **av, int i, int j, int new_size);
 char	**split_input(char *input, int i, int j);
 bool	is_separator(char c);
 char	**free_newav(char **array, int size);
+int		count_delimiters(char *av, char delimiter);
+int		count_new_size(char **av);
+bool	is_redirection(char *s);
 
 #endif

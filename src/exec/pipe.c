@@ -6,7 +6,7 @@
 /*   By: shurtado <shurtado@student.42barcelona.fr> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/02 17:41:03 by shurtado          #+#    #+#             */
-/*   Updated: 2024/10/09 13:30:40 by shurtado         ###   ########.fr       */
+/*   Updated: 2024/10/21 20:48:58 by shurtado         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,11 @@ void	init_pipes(t_ms *ms)
 		return ;
 	}
 	alloc_pipes(ms, pipe_count);
+	if (!ms->fd_pipe[0] && ms->fd_pipe)
+	{
+		free (ms->fd_pipe);
+		ms->fd_pipe = NULL;
+	}
 }
 
 void	process_pipe(int fd_pipe[2], int is_last, int fd_local[2])
@@ -88,11 +93,17 @@ int	wait_for_last_process(t_ms *ms)
 	int		exit_code;
 	char	*temp;
 
-	waitpid(ms->last_pid, &status, 0);
-	if (WIFEXITED(status))
+	wait_for_processes(ms->pidlst, &status);
+	ft_lstclear(&ms->pidlst, NULL);
+	if (has_builtin(ms->av) && !has_redirection(ms->av, PIPE_S))
 	{
-		exit_code = WEXITSTATUS(status);
+		temp = ft_itoa(ms->status);
+		assign_hash(ms->env, "?", temp);
+		free (temp);
+		return (ms->status);
 	}
+	if (WIFEXITED(status))
+		exit_code = WEXITSTATUS(status);
 	else if (WIFSIGNALED(status))
 		exit_code = WTERMSIG(status) + 128;
 	else
