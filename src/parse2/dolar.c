@@ -6,7 +6,7 @@
 /*   By: shurtado <shurtado@student.42barcelona.fr> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 23:58:47 by shurtado          #+#    #+#             */
-/*   Updated: 2024/10/21 20:20:24 by shurtado         ###   ########.fr       */
+/*   Updated: 2024/10/25 13:28:13 by linyao           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,18 +72,24 @@ char	*get_word(char *sinit, t_hash *env)
 
 void	manage_dolar(char **s, t_hash *env)
 {
-	bool	in_single_q;
+//	bool	in_single_q;
 	int		i;
 	char	*word;
+	Stack	quoteStack;
 
 	word = NULL;
 	i = 0;
-	in_single_q = false;
+	initStack(&quoteStack);
+//	in_single_q = false;
 	while ((*s)[i])
 	{
-		if ((*s)[i] == '\'')
-			in_single_q = !in_single_q;
-		if ((*s)[i] == '$' && !in_single_q)
+		if ((*s)[i] == '\'' && (isEmpty(&quoteStack) || peek(&quoteStack) != '\''))
+//			in_single_q = !in_single_q;
+			push(&quoteStack, '\'');
+		else if ((*s)[i] == '\'' && !isEmpty(&quoteStack) && peek(&quoteStack) == '\'')
+			pop(&quoteStack);
+//		if ((*s)[i] == '$' && !in_single_q)
+		if ((*s)[i] == '$' && (isEmpty(&quoteStack) || peek(&quoteStack) == '"'))
 		{
 			word = get_word((*s) + i, env);
 			swap_word(word, s, (*s) + i, -1);

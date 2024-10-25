@@ -6,7 +6,7 @@
 /*   By: shurtado <shurtado@student.42barcelona.fr> +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/11 12:14:45 by linyao            #+#    #+#             */
-/*   Updated: 2024/10/21 21:10:46 by shurtado         ###   ########.fr       */
+/*   Updated: 2024/10/25 13:31:55 by linyao           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@
 # include <signal.h>
 # include <termios.h>
 # include <stdint.h>
+# include <string.h>
 
 # define EXITERR "minishell: exit: %s: numeric argument required\n"
 # define PROMPT "\x1b[1;32mminishell\x1b[0m\x1b[1;36m > \x1b[0m"
@@ -54,6 +55,8 @@
 # define IN 0
 # define OUT 1
 
+# define MAX_STACK_SIZE 100
+
 # ifndef PATH_MAX
 #  define PATH_MAX 4096
 # endif
@@ -72,6 +75,12 @@ typedef struct s_ms
 	int				atty_in;
 	int				atty_out;
 }	t_ms;
+
+typedef struct
+{
+	char	items[MAX_STACK_SIZE];
+	int		top;
+} Stack;
 
 void	init_ms(t_ms *ms, char **env);
 void	init_env(t_ms *ms, char **env);
@@ -105,6 +114,11 @@ char	**get_infile_path(char ***av);
 void	renovar_array(char ***new_array, char **new_arr, char **str);
 void	initarrays(char **new_arr, char ***new_array);
 void	handle_quote_first(t_hash *env, char ***array, char **arr, char **c);
+void    initStack(Stack *stack);
+bool    push(Stack *stack, char c);
+bool    pop(Stack *stack);
+char    peek(Stack *stack);
+bool    isEmpty(Stack *stack);
 
 //Utils
 bool	is_special(const char *s);
