@@ -1,26 +1,27 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   dolar.c                                            :+:      :+:    :+:   */
+/*   testDollar.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: linyao <linyao@student.42barcelona.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/15 23:58:47 by shurtado          #+#    #+#             */
-/*   Updated: 2024/10/26 13:01:16 by linyao           ###   ########.fr       */
+/*   Created: 2024/10/26 13:01:57 by linyao            #+#    #+#             */
+/*   Updated: 2024/10/26 14:10:14 by linyao           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "testMini.h"
 
-//caracteres antes de dejar de procesar la palabra del dolar, ejemplo: $hola/tmp
-//solo $hola se debe procesar
 int	is_valid_char(char c)
 {
-	return (ft_isalnum(c) || c == '_' || c == '?');
+//	return (ft_isalnum(c) || c == '_' || c == '?');
+    return (isalnum(c) || c == '_' || c == '?');
 }
 
 void	swap_word(char *word, char **s, char *init, int i)
 {
+    strcpy(*s, word);
+/*
 	int		k;
 	char	tmp[900];
 
@@ -44,10 +45,14 @@ void	swap_word(char *word, char **s, char *init, int i)
 	tmp[i] = '\0';
 	free(*s);
 	*s = ft_strdup(tmp);
+*/
 }
 
-char	*get_word(char *sinit, t_hash *env)
+//char	*get_word(char *sinit, t_hash *env)
+char	*get_word(const char *s, char **env)
 {
+    return strdup("example");
+/*
 	int		i;
 	char	tmp[800];
 	char	*key;
@@ -68,11 +73,11 @@ char	*get_word(char *sinit, t_hash *env)
 	if (word)
 		return (word);
 	return (ft_strdup(""));
+*/
 }
 
-void	manage_dolar(char **s, t_hash *env)
+void	manage_dolar(char **s, char **env)
 {
-//	bool	in_single_q;
 	int		i;
 	char	*word;
 	Stack	quoteStack;
@@ -84,7 +89,6 @@ void	manage_dolar(char **s, t_hash *env)
 	initStack(&quoteStack);
 	sn = 0;
 	dn = 0;
-//	in_single_q = false;
 	while ((*s)[i])
 	{
 		if ((*s)[i] == '\\')
@@ -134,8 +138,6 @@ void	manage_dolar(char **s, t_hash *env)
 			pop(&quoteStack);
 			dn--;
 		}
-//			in_single_q = !in_single_q;
-//		if ((*s)[i] == '$' && !in_single_q)
 		if ((*s)[i] == '$' && (isEmpty(&quoteStack) || peek(&quoteStack) == '"' && \
 			(sn == 0 && dn == 0 || sn == 0 && dn == 1) || peek(&quoteStack) == '\'' && sn == 1 && dn == 1))
 		{
@@ -149,7 +151,7 @@ void	manage_dolar(char **s, t_hash *env)
 		i++;
 	}
 }
-
+/*
 void	expand_dolar(char **av, t_hash *env)
 {
 	int	i;
@@ -161,4 +163,15 @@ void	expand_dolar(char **av, t_hash *env)
 			manage_dolar(&av[i], env);
 		i++;
 	}
+}
+*/
+int main()
+{
+    char *input = strdup("\'\"$USER\"\'");
+    char *env[] = {"USER=example", NULL};
+    printf("Before proccessing: %s\n", input);
+    manage_dolar(&input, env);
+    printf("After proccessing: %s\n", input);
+    free(input);
+    return (0);
 }
