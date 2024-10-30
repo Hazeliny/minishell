@@ -72,7 +72,6 @@ char	*get_word(char *sinit, t_hash *env)
 
 void	manage_dolar(char **s, t_hash *env)
 {
-//	bool	in_single_q;
 	int		i;
 	char	*word;
 	Stack	quoteStack;
@@ -84,7 +83,6 @@ void	manage_dolar(char **s, t_hash *env)
 	initStack(&quoteStack);
 	sn = 0;
 	dn = 0;
-//	in_single_q = false;
 	while ((*s)[i])
 	{
 		if ((*s)[i] == '\\')
@@ -134,10 +132,8 @@ void	manage_dolar(char **s, t_hash *env)
 			pop(&quoteStack);
 			dn--;
 		}
-//			in_single_q = !in_single_q;
-//		if ((*s)[i] == '$' && !in_single_q)
-		if ((*s)[i] == '$' && (isEmpty(&quoteStack) || peek(&quoteStack) == '"' && \
-			(sn == 0 && dn == 0 || sn == 0 && dn == 1) || peek(&quoteStack) == '\'' && sn == 1 && dn == 1))
+		if ((*s)[i] == '$' && (isEmpty(&quoteStack) || (peek(&quoteStack) == '"' && \
+			((sn == 0 && dn == 0) || (sn == 0 && dn == 1))) || (peek(&quoteStack) == '\'' && sn == 1 && dn == 1)))
 		{
 			word = get_word((*s) + i, env);
 			swap_word(word, s, (*s) + i, -1);

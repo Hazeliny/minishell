@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "testMini.h"
+#include "minishell.h"
 
 void	initStack(Stack *stack)
 {
